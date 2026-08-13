@@ -1,0 +1,9 @@
+[
+  {
+    "name": "pico-01",
+    "device_type": "raspberry-pi-pico",
+    "environment": "production",
+    "location": "home",
+    "firmware_version": "1.0.0"
+  }
+]
