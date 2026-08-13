@@ -1,3 +1,5 @@
+# this is a test script to showhow to use the certificates to subscribe.
+
 import network
 import time
 import ssl
@@ -6,23 +8,12 @@ import ntptime
 import time
 
 
-
-# =========================
-# Configuration
-# =========================
-
 WIFI_SSID = "wifi-ssid"
-WIFI_PASSWORD = "jwifi-password"
+WIFI_PASSWORD = "wifi-password"
 AWS_ENDPOINT = "aws-endpoint"
 DEVICE_NAME = "device-name"
 
-
 TOPIC = f"devices/{DEVICE_NAME}/telemetry".encode()
-
-
-# =========================
-# WiFi
-# =========================
 
 wifi = network.WLAN(network.STA_IF)
 wifi.active(True)
@@ -34,7 +25,7 @@ wifi.connect(WIFI_SSID, WIFI_PASSWORD)
 while not wifi.isconnected():
     time.sleep(1)
 
-ntptime.settime()  # sync RTC before TLS context creation
+ntptime.settime()
 print("Time synced:", time.localtime())
 
 print("WiFi connected")
@@ -58,9 +49,9 @@ ctx.load_cert_chain(cert_bytes, key_bytes)
 print("TLS loaded")
 
 
-# =========================
-# MQTT
-# =========================
+def on_message(topic, msg):
+    print("Received on", topic.decode(), ":", msg.decode())
+
 
 print("Connecting to AWS IoT...")
 
@@ -71,24 +62,13 @@ client = MQTTClient(
     ssl=ctx
 )
 
+client.set_callback(on_message)
 client.connect()
 
 print("Connected to AWS IoT!")
 
-
-# =========================
-# Publish
-# =========================
+client.subscribe(TOPIC)
+print("Subscribed to:", TOPIC)
 
 while True:
-
-    message = b"Hello from pico-01!"
-
-    client.publish(
-        TOPIC,
-        message
-    )
-
-    print("Published:", message)
-
-    time.sleep(10)
+    client.wait_msg()  # blocks until a message arrives
