@@ -1,6 +1,3 @@
-# 1. Get AWS's registration code (proves you're registering with your account)
-data "aws_iot_registration_code" "this" {}
-
 resource "tls_private_key" "ca" {
   algorithm = "RSA"
   rsa_bits  = 2048
@@ -9,11 +6,11 @@ resource "tls_private_key" "ca" {
 resource "tls_self_signed_cert" "ca" {
   private_key_pem       = tls_private_key.ca.private_key_pem
   is_ca_certificate     = true
-  validity_period_hours = 87600 # 10 years
+  validity_period_hours = 87600
 
   subject {
-    common_name  = "FleetRootCA"
-    organization = "YourFleetProject"
+    common_name  = var.common_name
+    organization = var.organization
   }
 
   allowed_uses = [
@@ -37,17 +34,17 @@ resource "tls_cert_request" "verification" {
 }
 
 resource "tls_locally_signed_cert" "verification" {
-  cert_request_pem  = tls_cert_request.verification.cert_request_pem
+  cert_request_pem   = tls_cert_request.verification.cert_request_pem
   ca_private_key_pem = tls_private_key.ca.private_key_pem
   ca_cert_pem        = tls_self_signed_cert.ca.cert_pem
 
   validity_period_hours = 24
-  allowed_uses           = ["digital_signature", "key_encipherment"]
+  allowed_uses          = ["digital_signature", "key_encipherment"]
 }
 
 resource "aws_iot_ca_certificate" "fleet_root" {
-  active                  = true
-  ca_certificate           = tls_self_signed_cert.ca.cert_pem
-  verification_certificate = tls_locally_signed_cert.verification.cert_pem
-  allow_auto_registration  = true
+  active                       = true
+  ca_certificate_pem           = tls_self_signed_cert.ca.cert_pem
+  verification_certificate_pem = tls_locally_signed_cert.verification.cert_pem
+  allow_auto_registration      = true
 }
