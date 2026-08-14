@@ -594,24 +594,29 @@ Terraform will create a `credentials/` directory in the root of the repository, 
 ```
 credentials/
 ├── pico-01/
-│   ├── device.key
-│   ├── device.crt
-│   ├── device-pkcs8.key
-│   ├── AmazonRootCA1.pem
-│   └── AmazonRootCA1.der
+    ├── device.key
+    ├── device-pkcs8.key
+    ├── device.crt
+    ├── device.der
+    ├── AmazonRootCA1.pem
+    └── AmazonRootCA1.der
 ├── pico-02/
-│   ├── device.key
-│   ├── device.crt
-│   ├── device-pkcs8.key
-│   ├── AmazonRootCA1.pem
-│   └── AmazonRootCA1.der
+    ├── device.key
+    ├── device-pkcs8.key
+    ├── device.crt
+    ├── device.der
+    ├── AmazonRootCA1.pem
+    └── AmazonRootCA1.der
 └── pico-03/
     ├── device.key
-    ├── device.crt
     ├── device-pkcs8.key
+    ├── device.crt
+    ├── device.der
     ├── AmazonRootCA1.pem
     └── AmazonRootCA1.der
 ```
+### DER vs RSA keys
+MicroPython doesn't use the same openSSL (ssl) library that a standard machine would use. Micropythons ssl module is a condensed version of the standard ssl library. It doesn't include the parser to be able to accept standard rsa keys. Instead, you need to use the converted pure binary der format on microcontrollers running MicroPython. If you wanted to do testing from your machine locally using any of the cert bundles, you can use the standard rsa keys and the testing script in iot_jobs/local_test
 
 ### Device Credentials
 
@@ -619,8 +624,9 @@ Each device directory contains the files required for that device to establish a
 
 | File | Description |
 |---|---|
-| `device.key` | Device's unique RSA private key — proves the device's identity |
+| `device.key` | Device's unique RSA private key — proves the device's identity.|
 | `device-pkcs8.key` | Device's private key, converted to PKCS#8 format |
+| `device.der` | Device certificate, signed by the custom root CA converted to der for micropython |
 | `device.crt` | Device certificate, signed by the custom root CA |
 | `AmazonRootCA1.pem` | Amazon Root CA certificate (PEM) — lets the device verify it's actually connecting to AWS IoT, not an impersonator |
 | `AmazonRootCA1.der` | Amazon Root CA certificate (DER) |
