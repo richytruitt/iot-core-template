@@ -581,6 +581,62 @@ Once provisioning is complete, the device can use its generated certificate and 
 
 ---
 
+## Generated Device Credentials
+
+After running:
+
+```bash
+terraform apply
+```
+
+Terraform will create a `credentials/` directory in the root of the repository, with a subdirectory for each device defined in `devices.json`:
+
+```
+credentials/
+├── pico-01/
+│   ├── device.key
+│   ├── device.crt
+│   ├── device-pkcs8.key
+│   ├── AmazonRootCA1.pem
+│   └── AmazonRootCA1.der
+├── pico-02/
+│   ├── device.key
+│   ├── device.crt
+│   ├── device-pkcs8.key
+│   ├── AmazonRootCA1.pem
+│   └── AmazonRootCA1.der
+└── pico-03/
+    ├── device.key
+    ├── device.crt
+    ├── device-pkcs8.key
+    ├── AmazonRootCA1.pem
+    └── AmazonRootCA1.der
+```
+
+### Device Credentials
+
+Each device directory contains the files required for that device to establish a mutually authenticated TLS (mTLS) connection to AWS IoT Core:
+
+| File | Description |
+|---|---|
+| `device.key` | Device's unique RSA private key — proves the device's identity |
+| `device-pkcs8.key` | Device's private key, converted to PKCS#8 format |
+| `device.crt` | Device certificate, signed by the custom root CA |
+| `AmazonRootCA1.pem` | Amazon Root CA certificate (PEM) — lets the device verify it's actually connecting to AWS IoT, not an impersonator |
+| `AmazonRootCA1.der` | Amazon Root CA certificate (DER) |
+
+Copy the appropriate device's credential files to the device. For example, `pico-01` should use the files located in:
+
+```
+credentials/pico-01/
+```
+
+Each device's private key and certificate are unique to that device and must not be shared between devices.
+
+### Security
+
+The files in `credentials/` contain private keys. **Do not commit the `credentials/` directory to source control or upload the private keys to a public repository.**
+
 # Useful AWS Documentation
 
 - [AWS IoT Core X.509 Client Certificates](https://docs.aws.amazon.com/iot/latest/developerguide/x509-client-certs.html)

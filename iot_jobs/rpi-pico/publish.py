@@ -64,7 +64,7 @@ print("Connected to AWS IoT!")
 
 while True:
 
-    message = b"Hello from pico-01!"
+    message = f"Hello from {DEVICE_NAME}!".encode()
 
     client.publish(
         TOPIC,
