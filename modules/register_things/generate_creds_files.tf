@@ -69,3 +69,17 @@ resource "local_sensitive_file" "amazon_root_ca_der" {
     terraform_data.credential_directories
   ]
 }
+
+resource "local_sensitive_file" "amazon_root_ca_pem" {
+  for_each = local.devices_by_name
+
+  filename = "${path.root}/credentials/${each.value.name}/AmazonRootCA1.pem"
+
+  content_base64 = filebase64(
+    "${path.root}/certificates/AmazonRootCA1.pem"
+  )
+
+  depends_on = [
+    terraform_data.credential_directories
+  ]
+}
